@@ -1,0 +1,14 @@
+Can you find and correct any logical errors in the following code snippet and output the corrected code?
+
+function countVowels(str) {
+  let vowels = ['a', 'e', 'i', 'o', 'u'];
+  let count = 0;
+  
+  for (let i = 0; i < str.length; i++) {
+    if (vowels.includes(str[i])) {
+      count++;
+    }
+  }
+  
+  return count;
+}
