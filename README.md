@@ -1,2 +1,2 @@
 # JailGuard
-An unified LM defense framework that supports image and text modalities
+An unified LM defense strategy that supports image and text modalities
