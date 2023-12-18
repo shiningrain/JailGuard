@@ -1,2 +1,2 @@
 # JailGuard
-A unified LM defense strategy that supports image and text modalities
+A Mutation-Based Method for Multi-Modal Jailbreaking Attack Detection
