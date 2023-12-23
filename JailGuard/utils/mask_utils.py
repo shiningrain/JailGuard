@@ -354,7 +354,3 @@ def sm_process(text,amount,method='swap'):
         text=replace_at_index(text, select_index, tmp_string)
     return text
         
-
-if __name__=='__main__':
-    output=load_image(None,'/home/zxy_cuda11/data/DL_LLMATK/mask_result/1019/mask-typog-14-rand-200-200-1e36.png')
-    print(1)

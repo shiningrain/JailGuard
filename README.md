@@ -35,8 +35,9 @@ To install all dependencies, please get into this directory and run the followin
 pip install requirements.txt
 ```
 
-To conduct experiments on GPT-3.5(text modality), you need to add your Openai key [here](./JailGuard/utils/config.cfg)
-On image, you need to follow [this repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first.
+To conduct experiments on GPT-3.5(text modality), you need to add your Openai key [here](./JailGuard/utils/config.cfg).
+On image, you need to clone and follow [the visual_adv repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first.
+Then you need to replace the `YOUR_VISUAL_ADV_REPO` with the directory of the cloned repository and replace `YOUR_CONFIG` with your `eval_configs/minigpt4_eval.yaml` in your cloned visual_adv repo.
 
 ## Usage
 
@@ -54,6 +55,8 @@ On all types of collected attacks collected, the best detection accuracy of Jail
 By contrast, the best detection accuracy of the state-of-the-art baseline methods on any collected attacks is lower than JailGuard, and even less than 10% on `GPTsimulator` and `MasterKey-poc` attacks.
 
 ![figure](./misc/repo_fig1.png)
+
+
 ![figure](./misc/repo_fig3.png)
 ![figure](./misc/repo_fig2.png)
 
@@ -71,3 +74,5 @@ Both scripts have 6 parameters:
 6. `threshold` is the detetion threshold, default is 0.01 for GPT-3.5(text) and 0.0025 for MiniGPT-4(image)
 
 You need to assign values for 1/2/3/4 parameters in reproduction
+
+We also share all raw results (generated variants and LLM system responses [here]())

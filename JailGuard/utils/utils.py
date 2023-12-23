@@ -20,19 +20,15 @@ def read_config(name='OPENAI',path='./utils/config.cfg'):
     details_dict = dict(config.items(name))
     return details_dict
 
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
-
 def load_dirs_images(dir):
     output_list=[]
     name_list=[]
     for name in os.listdir(dir):
         path=os.path.join(dir,name)
-        if os.path.isfile(path):
-            base64_image = encode_image(path)
-        output_list.append(base64_image)
-        name_list.append(name)
+        if '.bmp' in path:
+            image = Image.open(path)
+            output_list.append(image)
+            name_list.append(name)
     return output_list, name_list
 
 def load_dirs(dir):

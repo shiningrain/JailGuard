@@ -3,6 +3,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"]="3"
 import sys
 sys.path.append('./utils')
+from minigpt_utils import query_minigpt,load_minigpt4
 from utils import *
 import numpy as np
 import uuid
@@ -11,10 +12,12 @@ from tqdm import trange
 from augmentations import *
 import pickle
 import spacy
+from PIL import Image
+import shutil
 
 def get_method(method_name): 
     try:
-        method = text_aug_dict[method_name]
+        method = img_aug_dict[method_name]
     except:
         print('Check your method!!')
         os._exit(0)
@@ -23,12 +26,12 @@ def get_method(method_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mask Text Experiment')
-    parser.add_argument('--mutator', default='TR', type=str, help='Random Replacement(RR),Random Insertion(RI),Targeted Replacement(TR),Targeted Insertion(TI),Random Deletion(RD),Synonym Replacement(SR),Punctuation Insertion(PI),Translation(TL),Rephrasing(RE)')
-    parser.add_argument('--path', default='./demo_case/input/28-MasterKey-poc', type=str, help='')
-    parser.add_argument('--variant_save_dir', default='./demo_case/variant', type=str, help='dir to save the modify results')
-    parser.add_argument('--response_save_dir', default='./demo_case/response', type=str, help='dir to save the modify results')
+    parser.add_argument('--mutator', default='RR', type=str, help='Random Mask(RM),Gaussian Blur(GB),Horizontal Flip(HF),Vertical Flip(VF),Crop and Resize(CR),Random Grayscale(RG),Random Rotation(RR),Colorjitter(CJ),Random Solarization(RS),Random Posterization(RP)')
+    parser.add_argument('--path', default='./demo_case/img/input', type=str, help='dir of image input and questions')
+    parser.add_argument('--variant_save_dir', default='./demo_case/img/variant', type=str, help='dir to save the modify results')
+    parser.add_argument('--response_save_dir', default='./demo_case/img/response', type=str, help='dir to save the modify results')
     parser.add_argument('--number', default='8', type=str, help='number of generated variants')
-    parser.add_argument('--threshold', default=0.01, type=str, help='Threshold of divergence')
+    parser.add_argument('--threshold', default=0.0025, type=str, help='Threshold of divergence')
     args = parser.parse_args()
 
     number=int(args.number)
@@ -41,45 +44,46 @@ if __name__ == '__main__':
     path=args.path
     for i in range(number):
         tmp_method=get_method(args.method)
-        f=open(path,'r')
-        text_lines=f.readlines()
-        # whole_text=''.join(text_lines)
-        f.close()
+        image_path=os.path.join(args.path,'image.bmp')
+        question_path=os.path.join(args.path,'question')
+        image = Image.open(image_path)
+        
         uid_name=str(uuid.uuid4())[:4]
         target_dir = args.variant_save_dir
         if len(os.listdir(target_dir))>=number+1: # skip if finished
             continue
 
-        output_result = tmp_method(text_list=text_lines)
-        target_path = os.path.join(target_dir,str(uuid.uuid4())[:6]+f'-{args.method}')
-        f=open(target_path,'w')
-        f.writelines(output_result)
-        f.close()
+        output_img = tmp_method(image)
+        target_path = os.path.join(target_dir,str(uuid.uuid4())[:6]+'.bmp')
+        output_img.save(target_path)
+    new_question_path=os.path.join(target_dir,'question')
+    if not os.path.exists(new_question_path):
+        shutil.copy(question_path,new_question_path)
+     
 
     # Step2: query_model 
-    variant_list, name_list= load_dirs(dir)
+    variant_list, name_list= load_dirs_images(args.variant_save_dir)
+    question_path=os.path.join(args.variant_save_dir,'question')
+    f=open(question_path,'r')
+    prompt_list=f.readlines()
+    f.close()
+    prompt=''.join(prompt_list)
     new_save_dir=args.response_save_dir
-    variant_list=[r'\n'.join(i) for i in variant_list]
+    if not os.path.exists(new_save_dir):
+        os.makedirs(new_save_dir)
     name_list, variant_list = (list(t) for t in zip(*sorted(zip(name_list,variant_list))))
+    minigpt_chat=load_minigpt4()#TODO: make sure you have replace the 'YOUR_XXX_PATH' in the ./utils/minigpt_utils.py
     for j in range(len(variant_list)):
-        prompt=variant_list[j]
-        # read_file_in_line(mask_file_list[i])
-        save_name=os.path.basename(variant_list[j])
-        existing_response=[i for i in os.listdir(new_save_dir) if'.png' not in i]
-        if len(existing_response)>=args.number:
+        image=variant_list[j]
+        save_name=name_list[j].split('.')[0]
+        existing_response=[i for i in os.listdir(new_save_dir)]
+        if len(existing_response)>=number:
             continue
 
         new_save_path=os.path.join(new_save_dir,save_name)
         if not os.path.exists(new_save_path):
-            try:
-                result = query_gpt('gpt-3.5-turbo',prompt,sleep=5)#TODO: make sure you have add your API key in this ./utils/config
-                res_content=result['message'].content
-            except openai.error.InvalidRequestError: # handle refusal
-                res_content='I cannot assist with that!'
-                print(f'Blocked in {new_save_path}')
-            except:
-                res_content='No response!' # handle exceptions
-                print(f'NO response in {new_save_path}')
+
+            res_content = query_minigpt(prompt,image,minigpt_chat)
             
             f=open(new_save_path,'w')
             f.writelines(res_content)

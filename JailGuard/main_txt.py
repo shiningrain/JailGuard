@@ -24,9 +24,9 @@ def get_method(method_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mask Text Experiment')
     parser.add_argument('--mutator', default='TR', type=str, help='Random Replacement(RR),Random Insertion(RI),Targeted Replacement(TR),Targeted Insertion(TI),Random Deletion(RD),Synonym Replacement(SR),Punctuation Insertion(PI),Translation(TL),Rephrasing(RE)')
-    parser.add_argument('--path', default='./demo_case/input/28-MasterKey-poc', type=str, help='')
-    parser.add_argument('--variant_save_dir', default='./demo_case/variant', type=str, help='dir to save the modify results')
-    parser.add_argument('--response_save_dir', default='./demo_case/response', type=str, help='dir to save the modify results')
+    parser.add_argument('--path', default='./demo_case/text/input/28-MasterKey-poc', type=str, help='path of the text input')
+    parser.add_argument('--variant_save_dir', default='./demo_case/text/variant', type=str, help='dir to save the modify results')
+    parser.add_argument('--response_save_dir', default='./demo_case/text/response', type=str, help='dir to save the modify results')
     parser.add_argument('--number', default='8', type=str, help='number of generated variants')
     parser.add_argument('--threshold', default=0.01, type=str, help='Threshold of divergence')
     args = parser.parse_args()
