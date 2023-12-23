@@ -53,7 +53,7 @@ JailGuard has separately achieved the best detection accuracy of 89.38% and 85.4
 In addition, JailGuard can effectively detect and defend different types of jailbreaking attacks.
 On all types of collected attacks collected, the best detection accuracy of JailGuard is always more than 70%.
 By contrast, the best detection accuracy of the state-of-the-art baseline methods on any collected attacks is lower than JailGuard, and even less than 10% on `GPTsimulator` and `MasterKey-poc` attacks.
-
+We have shared all raw experiment results(generated variants and LLM system responses) [here](https://drive.google.com/file/d/17-qioK5hFfzFkqsW33Sb6u8cjP8fb05B/view?usp=sharing).
 ![figure](./misc/repo_fig1.png)
 
 
@@ -74,5 +74,3 @@ Both scripts have 6 parameters:
 6. `threshold` is the detetion threshold, default is 0.01 for GPT-3.5(text) and 0.0025 for MiniGPT-4(image)
 
 You need to assign values for 1/2/3/4 parameters in reproduction
-
-We also share all raw results (generated variants and LLM system responses [here]())
