@@ -63,6 +63,7 @@ We have shared all raw experiment results(generated variants and LLM system resp
 ## Reproduction
 
 We have open-sourced our dataset [here](./JailGuard/dataset), you can directly download them by [this link](https://drive.google.com/file/d/1g3VWteNnSvdayuntfL7Dd838PlRpg7B9/view?usp=sharing).
+
 You can use this [script](./JailGuard/main_txt.py) to reproduce experiments on text inputs and this [script](./JailGuard/main_img.py) for image inputs.
 
 Both scripts have 6 parameters:
