@@ -54,8 +54,8 @@ In addition, JailGuard can effectively detect and defend different types of jail
 On all types of collected attacks collected, the best detection accuracy of JailGuard is always more than 70%.
 By contrast, the best detection accuracy of the state-of-the-art baseline methods on any collected attacks is lower than JailGuard, and even less than 10% on `GPTsimulator` and `MasterKey-poc` attacks.
 We have shared all raw experiment results(generated variants and LLM system responses) [here](https://drive.google.com/file/d/17-qioK5hFfzFkqsW33Sb6u8cjP8fb05B/view?usp=sharing).
-![figure](./misc/repo_fig1.png)
 
+![figure](./misc/repo_fig1.png)
 
 ![figure](./misc/repo_fig3.png)
 ![figure](./misc/repo_fig2.png)
