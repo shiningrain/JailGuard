@@ -1,9 +1,0 @@
-Add comments to the following shell script to explain what each command does.
-
-#!/bin/bash
-date
-pwd
-ls
-mkdir new_directory
-cd new_directory
-cat file.txt

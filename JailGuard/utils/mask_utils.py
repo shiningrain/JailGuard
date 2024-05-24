@@ -33,7 +33,7 @@ def get_synonyms(word):
     return list(synonyms)
 
 def synonym_replacement(words, n):
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     stop_words = set(stopwords.words('english'))
     words = words.split()
     
@@ -119,6 +119,9 @@ def get_image_path(path):
                 tmplist.append(m)
     return tmplist
 
+def get_number(string):
+    return int(os.path.basename(string).split('-')[0])
+
 def get_txt_path(path):
     tmplist = []
     if (os.path.exists(path)):
@@ -127,6 +130,7 @@ def get_txt_path(path):
             m = os.path.join(path,file1)
             if (os.path.isfile(m)):
                 tmplist.append(m)
+    tmplist = sorted(tmplist, key=get_number)
     return tmplist
 
 
@@ -201,8 +205,8 @@ def generate_mask_pil(image,mask_type,mask_size,position):
 
 
 def important_sentences(text, n=1,rate=0.0,check_q=True):
-    nltk.download('punkt')
-    nltk.download('stopwords')
+    # nltk.download('punkt')
+    # nltk.download('stopwords')
     if check_q:
         q_list=[]
     # Tokenize the text into sentences
@@ -328,7 +332,7 @@ def mask_text(text_list,level, max=10,ensure=True,method='replace',mode='random'
                 sentence=important_list[i]
                 tmp_start,tmp_end=find_string_index(whole_text,sentence)
                 range_list.append([tmp_start,tmp_end,times])# int(10/(i+1))
-                print(times)
+                # print(times)
             output_list=heat_mutate(whole_text,method=method,rate=level,range_list=range_list)
             output_list=[line+'\n' for line in output_list]
     else:
@@ -355,6 +359,3 @@ def sm_process(text,amount,method='swap'):
     return text
         
 
-if __name__=='__main__':
-    output=load_image(None,'/home/zxy_cuda11/data/DL_LLMATK/mask_result/1019/mask-typog-14-rand-200-200-1e36.png')
-    print(1)

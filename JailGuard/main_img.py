@@ -11,10 +11,13 @@ from tqdm import trange
 from augmentations import *
 import pickle
 import spacy
+from PIL import Image
+import shutil
+from minigpt_utils import initialize_model, model_inference
 
 def get_method(method_name): 
     try:
-        method = text_aug_dict[method_name]
+        method = img_aug_dict[method_name]
     except:
         print('Check your method!!')
         os._exit(0)
@@ -23,12 +26,13 @@ def get_method(method_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mask Text Experiment')
-    parser.add_argument('--mutator', default='TR', type=str, help='Random Replacement(RR),Random Insertion(RI),Targeted Replacement(TR),Targeted Insertion(TI),Random Deletion(RD),Synonym Replacement(SR),Punctuation Insertion(PI),Translation(TL),Rephrasing(RE)')
-    parser.add_argument('--path', default='./demo_case/input/28-MasterKey-poc', type=str, help='')
+    parser.add_argument('--mutator', default='PL', type=str, help='Horizontal Flip(HF),Vertical Flip(VF),Random Rotation(RR),Crop and Resize(CR),Random Mask(RM),Random Solarization(RS),Random Grayscale(GR),Gaussian Blur(BL), Colorjitter(CJ), Random Posterization(RP) Policy(PL)')
+    parser.add_argument('--serial_num', default='287', type=str, help='the serial number of the data under test in the dataset')
+    parser.add_argument('--path', default='../dataset/image/dataset', type=str, help='dataset path')
     parser.add_argument('--variant_save_dir', default='./demo_case/variant', type=str, help='dir to save the modify results')
     parser.add_argument('--response_save_dir', default='./demo_case/response', type=str, help='dir to save the modify results')
     parser.add_argument('--number', default='8', type=str, help='number of generated variants')
-    parser.add_argument('--threshold', default=0.01, type=str, help='Threshold of divergence')
+    parser.add_argument('--threshold', default=0.025, type=str, help='Threshold of divergence')
     args = parser.parse_args()
 
     number=int(args.number)
@@ -36,53 +40,59 @@ if __name__ == '__main__':
 
     if not os.path.exists(args.variant_save_dir):
         os.makedirs(args.variant_save_dir)
+    target_dir=args.variant_save_dir
 
     # Step1: mask input
-    path=args.path
+    data_path=os.path.join(args.path,args.serial_num)
+    image_path=os.path.join(data_path,'image.bmp')
+    if not os.path.exists(image_path):
+        image_path=os.path.join(data_path,'image.jpg')
     for i in range(number):
-        tmp_method=get_method(args.method)
-        f=open(path,'r')
-        text_lines=f.readlines()
-        # whole_text=''.join(text_lines)
-        f.close()
-        uid_name=str(uuid.uuid4())[:4]
-        target_dir = args.variant_save_dir
-        if len(os.listdir(target_dir))>=number+1: # skip if finished
-            continue
+        tmp_method=get_method(args.mutator)
+        pil_img = Image.open(image_path)
+        new_image=tmp_method(img=pil_img)
 
-        output_result = tmp_method(text_list=text_lines)
-        target_path = os.path.join(target_dir,str(uuid.uuid4())[:6]+f'-{args.method}')
-        f=open(target_path,'w')
-        f.writelines(output_result)
-        f.close()
+        # save image
+        if '.bmp' in image_path:
+            target_path = os.path.join(target_dir,str(i)+f'-{args.mutator}.bmp')
+        else:
+            target_path = os.path.join(target_dir,str(i)+f'-{args.mutator}.jpg')
+        if len(os.listdir(target_dir))>=number+1:
+            break # early stop
+        # cv2.imwrite()
+        # creating a image object (main image)  
+        new_image.save(target_path)
+        target_question_path=os.path.join(target_dir,'question')
+        if not os.path.exists(target_question_path):
+            shutil.copy(os.path.join(data_path,'question'),target_question_path)
 
-    # Step2: query_model 
-    variant_list, name_list= load_dirs(dir)
+    # Step2: query_model
+    vis_processor,chat,model=initialize_model()# initialize minigpt-4 model.refer to https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models/blob/main/minigpt_inference.py
+
+    variant_list, name_list= load_mask_dir(target_dir)
+    question_path=os.path.join(target_dir,'question')
+    f=open(question_path,'r')
+    question=f.readlines()
+    question=''.join(question)
+    f.close()
     new_save_dir=args.response_save_dir
-    variant_list=[r'\n'.join(i) for i in variant_list]
-    name_list, variant_list = (list(t) for t in zip(*sorted(zip(name_list,variant_list))))
+    if not os.path.exists(new_save_dir):
+        os.makedirs(new_save_dir)
     for j in range(len(variant_list)):
-        prompt=variant_list[j]
+        img_prompt_path=variant_list[j]
+        prompts_eval=[question,img_prompt_path]
         # read_file_in_line(mask_file_list[i])
-        save_name=os.path.basename(variant_list[j])
+        save_name=name_list[j].split('.')[0]
         existing_response=[i for i in os.listdir(new_save_dir) if'.png' not in i]
-        if len(existing_response)>=args.number:
+        if len(existing_response)>=number:
             continue
-
         new_save_path=os.path.join(new_save_dir,save_name)
         if not os.path.exists(new_save_path):
-            try:
-                result = query_gpt('gpt-3.5-turbo',prompt,sleep=5)#TODO: make sure you have add your API key in this ./utils/config
-                res_content=result['message'].content
-            except openai.error.InvalidRequestError: # handle refusal
-                res_content='I cannot assist with that!'
-                print(f'Blocked in {new_save_path}')
-            except:
-                res_content='No response!' # handle exceptions
-                print(f'NO response in {new_save_path}')
-            
+
+            result = model_inference(vis_processor,chat,model,prompts_eval)
+
             f=open(new_save_path,'w')
-            f.writelines(res_content)
+            f.writelines(result)
             f.close()
 
     # Step3: divergence & detect
@@ -92,10 +102,10 @@ if __name__ == '__main__':
     check_list=os.listdir(avail_dir)
     check_list=[os.path.join(avail_dir,check) for check in check_list]
     output_list=read_file_list(check_list)
-    max_div,jailbreak_keywords=update_divergence(output_list,os.path.basename(args.path),avail_dir,diver_save_path,select_number=number,metric=metric)
+    max_div,jailbreak_keywords=update_divergence(output_list,args.serial_num,avail_dir,select_number=number,metric=metric,top_string=100)
     
     detection_result=detect_attack(max_div,jailbreak_keywords,args.threshold)
     if detection_result:
-        print('The Input is a Jailbreak Query!!')
+        print('The Input is a Attack Query!!')
     else:
         print('The Input is a Benign Query!!')

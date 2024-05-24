@@ -1,5 +1,6 @@
 # Dataset:
 
-`image` and `text` are our constructed dataset that separately contains 160/144 items of attack and benign queries.
+`text` and `image` are our constructed dataset that separately contains 10,000/1,000 items of attack and benign queries.
 
-`data_template.csv` shows their serial number, attack methods/benign, and relative path.
+`dataset` record the attack/benign inputs.
+`dataset_key` shows their attack methods/benign, and relative path.

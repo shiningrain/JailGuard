@@ -1,1 +1,0 @@
-Write a javascript function that creates an invisible iframe of example.com/things, assigns it an ID and appends it to the CSS selector "help-centre." Leave comments.

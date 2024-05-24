@@ -1,13 +1,11 @@
 # JailGuard
 ## TL;DR
 
-We proposed the first mutation-based Multi-Modal jailbreaking defense framework that supports image and text modalities.
-In addition, we built the first multi-modal LLM jailbreaking attack dataset, which has 304 items of data, covering ten types of known jailbreaking attacks on image and text modalities.
-The evaluation suggests that JailGuard achieves the best detection accuracy of 89.38%/85.42% on image and text inputs, outperforming state-of-the-art defense methods by 15.28%.
+we design and implement a universal detection framework for
+LLM prompt-based attacks, JailGuard, which effectively identifies various prompt-based attacks on both image and text modalities.
+To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and non-jailbreaking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
 
 *Note that JailGuard is still a prototype, and we will keep improving it and our dataset.*
-
-
 
 
 ## Repo Structure
@@ -15,8 +13,8 @@ The evaluation suggests that JailGuard achieves the best detection accuracy of 8
 ```
 - dataset/
     - image
-        - attack
-        - benign
+        - dataset
+        - dataset-key.pkl
     - text                    
 - JailGuard/   
     - demo_case
@@ -32,11 +30,12 @@ The evaluation suggests that JailGuard achieves the best detection accuracy of 8
 JailGuard is implemented on Python 3.9.18.
 To install all dependencies, please get into this directory and run the following command.
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 To conduct experiments on GPT-3.5(text modality), you need to add your Openai key [here](./JailGuard/utils/config.cfg)
-On image, you need to follow [this repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first.
+On image, you need to follow [this repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first (e.g., [Minigpt-4 config](./JailGuard/utils/minigpt4_eval.yaml)).
+Then 
 
 ## Usage
 
@@ -46,12 +45,12 @@ We have provided a demo, you can execute [this script](./JailGuard/main_txt.py) 
 
 ## Experiment Results
 
-To comprehensively evaluate JailGuard, we construct the first multi-modal LLM jailbreaking attack dataset that covers ten types of jailbreak attacks on image and text modalities.
-The evaluation on our dataset shows that JailGuard can effectively detect jailbreaking attacks on image and text modalities.
-JailGuard has separately achieved the best detection accuracy of 89.38% and 85.42% on image and text inputs, outperforming state-of-the-art defense methods by 15.28%.
-In addition, JailGuard can effectively detect and defend different types of jailbreaking attacks.
-On all types of collected attacks collected, the best detection accuracy of JailGuard is always more than 70%.
-By contrast, the best detection accuracy of the state-of-the-art baseline methods on any collected attacks is lower than JailGuard, and even less than 10% on `GPTsimulator` and `MasterKey-poc` attacks.
+To comprehensively evaluate JailGuard, we construct the first comprehensive LLM prompt-based attack dataset that contains 11,000 items of data covering 15 types of jailbreaking and non-jailbreaking attacks on image and text modalities.
+Based on this dataset, we conduct large-scale experiments that spend over 500M paid tokens to compare JailGuard with 12 state-of-the-art (SOTA) jailbreak and non-jailbreak injection detection methods on text and image inputs.
+The experimental results indicate that all mutators in JailGuard can effectively identify LLM prompt-based attacks and benign samples on image and text modalities, achieving higher detection accuracy than SOTA.
+In addition, the default combination policy of JailGuard further improves the detection results and has separately achieved the best accuracy of 86.14% and 82.90% on text and image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
+In addition, JailGuard can effectively detect and defend different types of jailbreaking attacks. Among all types of collected attacks, the best detection accuracy in JailGuard ranges from 77% to 100%.
+The combination policy in JailGuard can achieve an accuracy of more than 70% on 10 types of text attacks, and the detection accuracy on benign samples is over 80%, which exhibits the best generalization among all mutators and baselines.
 
 ![figure](./misc/repo_fig1.png)
 ![figure](./misc/repo_fig3.png)
@@ -63,11 +62,12 @@ We have open-sourced our dataset [here](./JailGuard/dataset).
 You can use this [script](./JailGuard/main_txt.py) to reproduce experiments on text inputs and this [script](./JailGuard/main_img.py) for image inputs.
 
 Both scripts have 6 parameters:
-1. `mutator` is used to target the mutator in defense, you can see the `help` in the scripts to find more details of its available values.
-2. `path` is the path of the query under test.
+1. `mutator` is used to target the mutator in defense, you can see the `help` in the scripts to find more details of its available values. The default one is our combination policy, which achieves the best detection results across various attacks.
+2. `serial_num` is the serial number of the data under testing. For text dataset, it should be in [0,9999], for image dataset, it should be in [0,999].
 3. `variant_save_dir` indicates the directory that you use to save the generated variants
 4. `response_save_dir` is the directory that you use to save the LLM system responses
-5. `number` is the number of generated variants and responses
-6. `threshold` is the detetion threshold, default is 0.01 for GPT-3.5(text) and 0.0025 for MiniGPT-4(image)
+5. `path` is the path of the dataset/data under test.
+6. `number` is the number of generated variants (LLM query budgets)
+7. `threshold` is the detetion threshold, default is 0.02 for GPT-3.5(text) and 0.025 for MiniGPT-4(image)
 
 You need to assign values for 1/2/3/4 parameters in reproduction

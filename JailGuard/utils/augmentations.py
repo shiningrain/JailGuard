@@ -2,8 +2,15 @@ from mask_utils import *
 import sys
 from utils import *
 import numpy as np
-from baseline_utils import get_safety_checker,llama_check_text
-from textaugment import EDA,AEDA,Word2vec, Translate
+import torchvision.transforms as T
+
+
+
+def remove_non_utf8(text):
+    # Filter out non-UTF-8 characters
+    utf8_chars = [char for char in text if ord(char) < 128]
+    # Join the filtered characters to form a new string
+    return ''.join(utf8_chars)
 
 def sample_float_level(maxl,minl=0.1):
   return np.random.uniform(low=minl, high=maxl)
@@ -74,15 +81,6 @@ def sm_patch_text(text_list,level=0.2,fix=False):  #random replace q% consecutiv
     output_list=[output+'\n' for output in output_list]
     return output_list
 
-def rephrase_text(text_list,level=None,model='gpt-3.5-turbo'):
-    # input text_list with '\n' at the end of each piece of text
-    whole_text=''.join(text_list)
-    prompt="Please rephrase the following paragraph while ensuring its core semantics and contents unchanged. \n The paragraph is :`"+whole_text+'`'
-    result = query_gpt(model,prompt,sleep=3)
-    rephrase_result=result['message'].content
-    output_list=rephrase_result.split('\n')
-    output_list=[line+'\n' for line in output_list]
-    return output_list
 
 
 def synonym_replace_text(text_list,level=20):
@@ -105,32 +103,60 @@ def rand_del_text(text_list,level=0.01):
     return output_list
 
 def aeda_punc_text(text_list,level=None,misc=None):
+    from textaugment import AEDA
     whole_text=''.join(text_list)
     if misc==None:
         t = AEDA()
     else:
         t = misc
-    whole_text=t.punct_insertion(whole_text)
+    try:
+        whole_text=t.punct_insertion(whole_text)
+    except ValueError as e:
+        print(e)
+        whole_text=whole_text
     output_list=whole_text.split('\n')
     output_list=[output+'\n' for output in output_list]
     return output_list
 
 def translate_text(text_list,level=10,misc="en"):
+    from textaugment import Translate
     rate=sample_int_level(level,0)
     target_list=['ru','fr','de','el','id','it','ja','ko','la','pl']
     whole_text=''.join(text_list)
+    whole_text=remove_non_utf8(whole_text)
 
     t = Translate(src=misc, to=target_list[rate])
-    whole_text=t.augment(whole_text)
+    try:
+        whole_text=t.augment(whole_text)
+    except Exception as e:
+        print(e)
+        whole_text=whole_text
+    # whole_text=t.augment(whole_text)
     output_list=whole_text.split('\n')
     output_list=[output+'\n' for output in output_list]
+    return output_list
+
+def find_index(L, b):
+    for i in range(len(L) - 1):
+        if b > L[i] and b < L[i + 1]:
+            return i
+    return -1
+
+def policy_aug_text(text_list,level='0.24-0.52-0.24',pool='PI-TI-TL'):
+    mutator_list=[text_aug_dict[_mut] for _mut in pool.split('-')]
+    probability_list=[float(_value) for _value in level.split('-')]
+    probability_list=[sum(probability_list[:i]) for i in range(len(level))]
+    randnum=np.random.random()
+    index=find_index(probability_list,randnum)
+    print(index,randnum)
+    output_list=mutator_list[index](text_list)
     return output_list
 
 '''=======================Image Level Mask======================='''
 
 def mask_image(img,level=None,position='rand',mask_type='r',mask_size=(200,200)):
     img_size=img.size # width, height
-    new_mask_size=[min(mask_size[sz],(0.5*img_size[sz])) for sz in range(len(mask_size))]
+    new_mask_size=[min(mask_size[sz],(0.3*img_size[sz])) for sz in range(len(mask_size))]
     # mask size should not larget than 0.5*image size
     position=load_position(position,img_size,new_mask_size)
     # generate mask
@@ -139,7 +165,6 @@ def mask_image(img,level=None,position='rand',mask_type='r',mask_size=(200,200))
     return new_image
 
 def blur_image(img,level=5):
-    import torchvision.transforms as T
     # level: int: 5 --> kernel size
     k1=sample_odd_level(level)
     k2=sample_odd_level(level)
@@ -148,25 +173,29 @@ def blur_image(img,level=5):
     return new_image
 
 def flip_image(img,level=1.0):
-    import torchvision.transforms as T
     # level: float: 1.0 --> p
     p=sample_float_level(level)
     transform = T.RandomHorizontalFlip(p=p)
     new_image = transform(img)
     return new_image
 
-def resize_crop_image(img,level=1000):
-    import torchvision.transforms as T
+def vflip_image(img,level=1.0):
+    # level: float: 1.0 --> p
+    p=sample_float_level(level)
+    transform = T.RandomVerticalFlip(p=p)
+    new_image = transform(img)
+    return new_image
+
+def resize_crop_image(img,level=500):
     # level: int: 500 --> image size
     size=img.size
-    s1=max(sample_int_level(level),0.8*size[0])
-    s2=max(sample_int_level(level),0.8*size[1])
+    s1=int(max(sample_int_level(level),0.8*size[0]))
+    s2=int(max(sample_int_level(level),0.8*size[1]))
     transform = T.RandomResizedCrop((s2, s1),scale=(0.9,1))
     new_image = transform(img)
     return new_image
 
 def gray_image(img,level=1):
-    import torchvision.transforms as T
     rate=sample_float_level(level)
     if rate >=0.5:
         transform = T.Grayscale(num_output_channels=len(img.split()))
@@ -175,13 +204,45 @@ def gray_image(img,level=1):
         new_image = img
     return new_image
 
-# text_aug = [
-#     rephrase_text, rand_replace_text, rand_add_text, target_replace_text, target_add_text,sm_insert_text,
-#     sm_patch_text,sm_swap_text,rand_del_text,synonym_replace_text,aeda_punc_text,translate_text
-#     ]
+def rotation_image(img,level=180):
+    rate=sample_float_level(level)
+    transform = T.RandomRotation(degrees=(0, rate))
+    new_image = transform(img)
+    return new_image
 
+def colorjitter_image(img,level1=1,level2=0.5):
+    rate1=sample_float_level(level1)
+    rate2=sample_float_level(level2)
+    transform = T.ColorJitter(brightness=rate1, hue=rate2)
+    new_image = transform(img)
+    return new_image
+
+def solarize_image(img,level=200):
+    rate=sample_float_level(level)
+    transform = T.RandomSolarize(threshold=rate)
+    new_image = transform(img)
+    return new_image
+
+def posterize_image(img,level=3):
+    rate=sample_int_level(level)
+    transform = T.RandomPosterize(bits=rate)
+    new_image = transform(img)
+    return new_image
+
+def policy_aug_image(img,level='0.34-0.45-0.21',pool='RR-BL-RP'):
+    mutator_list=[img_aug_dict[_mut] for _mut in pool.split('-')]
+    probability_list=[float(_value) for _value in level.split('-')]
+    probability_list=[sum(probability_list[:i]) for i in range(len(level))]
+    randnum=np.random.random()
+    index=find_index(probability_list,randnum)
+    
+    new_image=mutator_list[index](img)
+    return new_image
+
+
+# ===============================================
 text_aug = [
-    rephrase_text, rand_replace_text, rand_add_text, target_replace_text, target_add_text,
+    rand_replace_text, rand_add_text, target_replace_text, target_add_text,
     rand_del_text,synonym_replace_text,aeda_punc_text,translate_text
     ]
 
@@ -190,26 +251,27 @@ text_aug_dict={
     'RI':rand_add_text,
     'TR':target_replace_text,
     'TI':target_add_text,
-    'RE':rephrase_text,
     'RD':rand_del_text,
     'SR':synonym_replace_text,
     'PI':aeda_punc_text,
     'TL':translate_text,
+    'PL':policy_aug_text,
 }
 
 img_aug = [
-    mask_image, blur_image, flip_image, resize_crop_image, gray_image
+    mask_image, blur_image, flip_image, resize_crop_image, gray_image, rotation_image, colorjitter_image,
+    vflip_image,solarize_image,posterize_image
 ]
-
 img_aug_dict={
-    'RR':rand_replace_text,
-    'RI':rand_add_text,
-    'TR':target_replace_text,
-    'TI':target_add_text,
-    'RE':rephrase_text,
-    'RD':rand_del_text,
-    'SR':synonym_replace_text,
-    'PI':aeda_punc_text,
-    'TL':translate_text,
+    'RM':mask_image,
+    'BL':blur_image,
+    'HF':flip_image,
+    'CR':resize_crop_image,
+    'GR':gray_image,
+    'RR':rotation_image,
+    'CJ':colorjitter_image,
+    'VF':vflip_image,
+    'RS':solarize_image,
+    'RP':posterize_image,
+    'PL':policy_aug_image,
 }
-
