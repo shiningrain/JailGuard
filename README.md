@@ -1,7 +1,7 @@
 # JailGuard
 ## TL;DR
 
-we design and implement a universal detection framework for
+We design and implement a universal detection framework for
 LLM prompt-based attacks, JailGuard, which effectively identifies various prompt-based attacks on both image and text modalities.
 To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and non-jailbreaking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
 
@@ -53,12 +53,14 @@ In addition, JailGuard can effectively detect and defend different types of jail
 The combination policy in JailGuard can achieve an accuracy of more than 70% on 10 types of text attacks, and the detection accuracy on benign samples is over 80%, which exhibits the best generalization among all mutators and baselines.
 
 ![figure](./misc/repo_fig1.png)
+
 ![figure](./misc/repo_fig3.png)
 ![figure](./misc/repo_fig2.png)
 
 ## Reproduction
 
-We have open-sourced our dataset [here](./JailGuard/dataset).
+We have open-sourced our dataset [here](./JailGuard/dataset), you can directly download them by [this link](https://drive.google.com/file/d/1g3VWteNnSvdayuntfL7Dd838PlRpg7B9/view?usp=sharing).
+
 You can use this [script](./JailGuard/main_txt.py) to reproduce experiments on text inputs and this [script](./JailGuard/main_img.py) for image inputs.
 
 Both scripts have 6 parameters:

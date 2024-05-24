@@ -3,6 +3,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"]="3"
 import sys
 sys.path.append('./utils')
+from minigpt_utils import query_minigpt,load_minigpt4
 from utils import *
 import numpy as np
 import uuid
@@ -17,6 +18,7 @@ from minigpt_utils import initialize_model, model_inference
 
 def get_method(method_name): 
     try:
+        method = img_aug_dict[method_name]
         method = img_aug_dict[method_name]
     except:
         print('Check your method!!')

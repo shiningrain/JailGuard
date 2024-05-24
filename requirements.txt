@@ -1,7 +1,7 @@
 nltk==3.8.1
 numpy==1.23.5
 openai==1.1.1
-Pillow @ file:///croot/pillow_1696580024257/work
+Pillow
 spacy==3.7.2
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
