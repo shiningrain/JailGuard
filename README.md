@@ -3,7 +3,7 @@
 
 We design and implement a universal detection framework for
 LLM prompt-based attacks, JailGuard, which effectively identifies various prompt-based attacks on both image and text modalities.
-To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and non-jailbreaking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
+To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and hijacking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
 
 *Note that JailGuard is still a prototype, and we will keep improving it and our dataset.*
 
@@ -45,8 +45,8 @@ We have provided a demo, you can execute [this script](./JailGuard/main_txt.py) 
 
 ## Experiment Results
 
-To comprehensively evaluate JailGuard, we construct the first comprehensive LLM prompt-based attack dataset that contains 11,000 items of data covering 15 types of jailbreaking and non-jailbreaking attacks on image and text modalities.
-Based on this dataset, we conduct large-scale experiments that spend over 500M paid tokens to compare JailGuard with 12 state-of-the-art (SOTA) jailbreak and non-jailbreak injection detection methods on text and image inputs.
+To comprehensively evaluate JailGuard, we construct the first comprehensive LLM prompt-based attack dataset that contains 11,000 items of data covering 15 types of jailbreaking and hijacking attacks on image and text modalities.
+Based on this dataset, we conduct large-scale experiments that spend over 500M paid tokens to compare JailGuard with 12 state-of-the-art (SOTA) jailbreak and injection-based hijacking detection methods on text and image inputs.
 The experimental results indicate that all mutators in JailGuard can effectively identify LLM prompt-based attacks and benign samples on image and text modalities, achieving higher detection accuracy than SOTA.
 In addition, the default combination policy of JailGuard further improves the detection results and has separately achieved the best accuracy of 86.14% and 82.90% on text and image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
 In addition, JailGuard can effectively detect and defend different types of jailbreaking attacks. Among all types of collected attacks, the best detection accuracy in JailGuard ranges from 77% to 100%.
