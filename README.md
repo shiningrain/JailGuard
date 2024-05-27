@@ -3,7 +3,7 @@
 
 We design and implement a universal detection framework for
 LLM prompt-based attacks, JailGuard, which effectively identifies various prompt-based attacks on both image and text modalities.
-To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and hijacking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.74% and 12.20%-21.40%.
+To comprehensively evaluate the detection effect of JailGuard, we construct the first comprehensive LLM prompt-based attack dataset, covering 15 jailbreaking and hijacking attacks and 11,000 items of data on image and text modalities. Our experiment results show that JailGuard achieves the best detection accuracy of 86.14%/ 82.90% on text/image inputs, significantly outperforming state-of-the-art defense methods by 11.81%-25.73% and 12.20%-21.40%.
 
 *Note that JailGuard is still a prototype, and we will keep improving it and our dataset.*
 
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ```
 
 To conduct experiments on GPT-3.5(text modality), you need to add your Openai key [here](./JailGuard/utils/config.cfg)
-On image, you need to follow [this repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first (e.g., [Minigpt-4 config](./JailGuard/utils/minigpt4_eval.yaml)).
+On the image, you need to follow [this repo](https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models) to download and setup MiniGPT-4 first (e.g., [Minigpt-4 config](./JailGuard/utils/minigpt4_eval.yaml)).
 Then 
 
 ## Usage
@@ -65,11 +65,11 @@ You can use this [script](./JailGuard/main_txt.py) to reproduce experiments on t
 
 Both scripts have 6 parameters:
 1. `mutator` is used to target the mutator in defense, you can see the `help` in the scripts to find more details of its available values. The default one is our combination policy, which achieves the best detection results across various attacks.
-2. `serial_num` is the serial number of the data under testing. For text dataset, it should be in [0,9999], for image dataset, it should be in [0,999].
+2. `serial_num` is the serial number of the data under testing. For the text dataset, it should be in [0,9999], for the image dataset, it should be in [0,999].
 3. `variant_save_dir` indicates the directory that you use to save the generated variants
 4. `response_save_dir` is the directory that you use to save the LLM system responses
 5. `path` is the path of the dataset/data under test.
 6. `number` is the number of generated variants (LLM query budgets)
-7. `threshold` is the detetion threshold, default is 0.02 for GPT-3.5(text) and 0.025 for MiniGPT-4(image)
+7. `threshold` is the detection threshold, default is 0.02 for GPT-3.5(text) and 0.025 for MiniGPT-4(image)
 
 You need to assign values for 1/2/3/4 parameters in reproduction
