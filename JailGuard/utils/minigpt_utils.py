@@ -24,19 +24,19 @@ from minigpt4.runners import *
 from minigpt4.tasks import *
 from tqdm import tqdm
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Demo")
-    parser.add_argument("--cfg_path", default='./utils/minigpt4_eval.yaml', help="path to configuration file. refer to https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models/blob/main/minigpt_inference.py")
-    parser.add_argument(
-        "--options",
-        nargs="+",
-        help="override some settings in the used config, the key-value pair "
-        "in xxx=yyy format will be merged into config file (deprecate), "
-        "change to --cfg-options instead.",
-    )
-    parser.add_argument("--gpu_id", type=str, default='0', help="specify the gpu to load the model.")
-    args = parser.parse_args()
-    return args
+# def parse_args():
+#     parser = argparse.ArgumentParser(description="Demo")
+#     parser.add_argument("--cfg_path", default='./utils/minigpt4_eval.yaml', help="path to configuration file. refer to https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models/blob/main/minigpt_inference.py")
+#     parser.add_argument(
+#         "--options",
+#         nargs="+",
+#         help="override some settings in the used config, the key-value pair "
+#         "in xxx=yyy format will be merged into config file (deprecate), "
+#         "change to --cfg-options instead.",
+#     )
+#     parser.add_argument("--gpu_id", type=str, default='0', help="specify the gpu to load the model.")
+#     args = parser.parse_args()
+#     return args
 
 
 def setup_seeds(config):
@@ -102,7 +102,18 @@ def filter_dirs(mask_dir_list,method_list,max=20):
 
 def initialize_model():
     print('Initializing Chat')
-    args = parse_args()
+    # args = parse_args()
+    parser = argparse.ArgumentParser(description="Demo")
+    parser.add_argument("--cfg_path", default='./utils/minigpt4_eval.yaml', help="path to configuration file. refer to https://github.com/Unispac/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models/blob/main/minigpt_inference.py")
+    parser.add_argument(
+        "--options",
+        nargs="+",
+        help="override some settings in the used config, the key-value pair "
+        "in xxx=yyy format will be merged into config file (deprecate), "
+        "change to --cfg-options instead.",
+    )
+    parser.add_argument("--gpu_id", type=str, default='0', help="specify the gpu to load the model.")
+    args = parser.parse_args()
     cfg = Config(args)
     os.environ["CUDA_VISIBLE_DEVICES"]=f'{args.gpu_id}'
     model_config = cfg.model_cfg

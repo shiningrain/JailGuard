@@ -275,4 +275,4 @@ img_aug_dict={
     'RP':posterize_image,
     'PL':policy_aug_image,
 }
-translate_text(['We observe that the detection accuracy of the \sys\'s mutators do not drop significantly when the LLM query budgets (\ie, the number of generated variants) reduce from the LLM query budget \(N=8\) to \(N=4\) and is always better than that of the best baseline SmoothLLM. This finding can provide guidance on attack detection and defense in low-budget scenarios.'])
+# translate_text(['We observe that the detection accuracy of the \sys\'s mutators do not drop significantly when the LLM query budgets (\ie, the number of generated variants) reduce from the LLM query budget \(N=8\) to \(N=4\) and is always better than that of the best baseline SmoothLLM. This finding can provide guidance on attack detection and defense in low-budget scenarios.'])
